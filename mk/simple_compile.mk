@@ -28,7 +28,7 @@ $(INSTALL_EACH): all
 clean:
 	$(RM) -f $(TARGETS) *.o 
 
-.gitignore:
-	echo $(TARGETS) > $@
+.gitignore: $(TARGETS)
+	echo $(TARGETS) | sed -e 's/\s/\n/g' > $@
 
 .PHONY: all install clean $(INSTALL_EACH)
