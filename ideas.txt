@@ -1,0 +1,18 @@
+sched
+iosched
+optarg
+tmp file trapper
+select loop
+epoll loop
+timerfd
+signalfd
+inotify
+netlink-uevent
+/procfs
+/sysfs
+/debugfs
+mmap regrw
+mmcsd ioctl
+memory overuse
+cpu overuse
+preload
