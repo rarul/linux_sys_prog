@@ -1,18 +1,18 @@
 CC := gcc
 CXX := g++
-CFLAGS := -c -g -O2 -Wextra
-CXXFLAGS := $(CFLAGS)
-#LDFLAGS :=
+CFLAGS := $(CFLAGS) -c -g -O2 -Wextra
+CXXFLAGS := $(CXXFLAGS) $(CFLAGS)
+#LDFLAGS ?=
 
-INSTALLDIR = $(MAKETOP)/usr/local/bin
-TARGETS = $(patsubst %.c,%,$(wildcard *.c)) \
+INSTALLDIR ?= $(MAKETOP)/usr/local/bin
+TARGETS ?= $(patsubst %.c,%,$(wildcard *.c)) \
 	$(patsubst %.cpp,%,$(wildcard *.cpp)) \
 	$(patsubst %.cc,%,$(wildcard *.cc))
 define TARGETS_DEPEND
 $(1): $(1).o
 endef
 
-INSTALL_EACH = $(patsubst %,install-%,$(TARGETS))
+INSTALL_EACH := $(patsubst %,install-%,$(TARGETS))
 
 all: $(TARGETS)
 
