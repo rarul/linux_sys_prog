@@ -14,16 +14,6 @@
 #include  <pthread.h>
 #include  "util.h"
 
-#define SYSCALLWRAP(SNAME, ...)								\
-	do {													\
-		int ret;											\
-		ret = SNAME(__VA_ARGS__);							\
-		if (ret) {											\
-			err(1, #SNAME);									\
-		}													\
-	} while(0)
-#define MEMSET(val) memset(&val,0,sizeof(val))
-
 static void do_client_work(const int fd) {
 	char buf[64];
 	int len;
@@ -45,9 +35,9 @@ static void client_main(const int server_port) {
 	int client_sock;
 	struct sockaddr_in client_addr;
 
-	client_sock = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0);
+	client_sock = create_socket(AF_INET, SOCK_STREAM);
 	if (client_sock < 0) {
-		err(1, "socket");
+		errx(1, "socket");
 		return;
 	}
 

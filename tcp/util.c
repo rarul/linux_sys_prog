@@ -1,6 +1,10 @@
 #include  <unistd.h>
+#include  <err.h>
 #include  <sys/errno.h>
 #include  <sys/syscall.h>
+#include  <sys/socket.h>
+#include  <netinet/in.h>
+#include  <netinet/tcp.h>
 
 #include  "util.h"
 
@@ -33,4 +37,36 @@ ssize_t do_write (const int fd, void *buf, const size_t count) {
 
 pid_t gettid(void) {
 	return syscall(SYS_gettid);
+}
+
+#define MYSOLSOCKET(thisoption,value)									\
+	do {																\
+		int on_value = value;											\
+		SYSCALLWRAP(setsockopt, sock_fd, SOL_SOCKET, thisoption, &on_value, sizeof(on_value)); \
+	} while(0)
+#define MYIPPROTOTCP(thisoption,value)									\
+	do {																\
+		int on_value = value;											\
+		SYSCALLWRAP(setsockopt, sock_fd, IPPROTO_TCP, thisoption, &on_value, sizeof(on_value)); \
+	} while(0)
+int create_socket(int domain, int type) {
+	int sock_fd;
+
+	sock_fd = socket(domain, type | SOCK_CLOEXEC, 0);
+	if (sock_fd < 0) {
+		warn("socket");
+		return -1;
+	}
+
+	if (domain == AF_INET) {
+		MYSOLSOCKET(SO_REUSEADDR, 1);
+		if (type == SOCK_STREAM) {
+			MYSOLSOCKET(SO_KEEPALIVE,1);
+			MYIPPROTOTCP(TCP_KEEPIDLE,10);
+			MYIPPROTOTCP(TCP_KEEPINTVL,1);
+			MYIPPROTOTCP(TCP_KEEPCNT,5);
+		}
+	}
+
+	return sock_fd;
 }

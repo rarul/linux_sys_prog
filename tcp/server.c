@@ -16,16 +16,6 @@
 
 #define CLIENT_THREAD_POOL_NUM  (4)
 
-#define SYSCALLWRAP(SNAME, ...)								\
-	do {													\
-		int ret;											\
-		ret = SNAME(__VA_ARGS__);							\
-		if (ret) {											\
-			err(1, #SNAME);									\
-		}													\
-	} while(0)
-#define MEMSET(val) memset(&val,0,sizeof(val))
-
 struct my_client_info_t {
 	int fd;
 	struct sockaddr_in addr;
@@ -98,7 +88,7 @@ static void client_thread_init(){
 static void server_main(const int server_port){
 	int client_sock = -1;
 	int server_sock = -1;
-	const int on_value = 1;
+	int on_value = 1;
 	ssize_t write_size = -1;
 
 	struct sockaddr_in server_addr;
@@ -106,14 +96,12 @@ static void server_main(const int server_port){
 	struct sockaddr_in client_addr;
 	socklen_t client_addrlen = -1;
 
-	server_sock = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0);
+	server_sock = create_socket(AF_INET, SOCK_STREAM);
 	if (server_sock < 0) {
-		err(1, "socket");
+		errx(1, "socket");
 		return;
 	}
 
-	SYSCALLWRAP(setsockopt, server_sock, SOL_SOCKET, SO_REUSEADDR, &on_value, sizeof(on_value));
-	
 	MEMSET(server_addr);
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(server_port);
@@ -148,6 +136,7 @@ static void server_main(const int server_port){
 }
 
 int main(int argc, char *argv[]){
+	
 	client_thread_init();
 	server_main(12345);
 	printf("waiting client_fd to be closed\n");
