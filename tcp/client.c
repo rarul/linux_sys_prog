@@ -19,13 +19,19 @@ static void do_client_work(const int fd) {
 	int len;
 	struct sockaddr_in client_addr;
 	socklen_t client_addr_len;
+	struct sockaddr_in server_addr;
+	socklen_t server_addr_len;
 
 	client_addr_len = sizeof(client_addr);
 	MEMSET(client_addr);
 	SYSCALLWRAP(getsockname, fd, (struct sockaddr*)&client_addr, &client_addr_len);
+	server_addr_len = sizeof(server_addr);
+	MEMSET(server_addr);
+	SYSCALLWRAP(getpeername, fd, (struct sockaddr*)&server_addr, &server_addr_len);
 	
-	len = snprintf (buf, sizeof(buf), "(pid=%d addr=%s, port=%d)", getpid(),
-					inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
+	len = snprintf (buf, sizeof(buf), "(pid=%d sa=%s sp=%d da=%s dp=%d)", getpid(),
+					inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port),
+					inet_ntoa(server_addr.sin_addr), ntohs(server_addr.sin_port));
 	if (len < 0) {
 		err(1, "snprintf");
 	}
