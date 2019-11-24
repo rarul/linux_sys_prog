@@ -1,6 +1,7 @@
-sched
+== linux sys prog
+OK sched
 iosched
-optarg
+OK optarg
 tmp file trapper
 select loop
 epoll loop
@@ -8,11 +9,17 @@ timerfd
 signalfd
 inotify
 netlink-uevent
+preload
+
+== kernel modules
 /procfs
 /sysfs
 /debugfs
 mmap regrw
 mmcsd ioctl
 memory overuse
+
+== test tools
 cpu overuse
-preload
+mem overuse
+
