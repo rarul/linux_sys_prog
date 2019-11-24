@@ -27,7 +27,15 @@
 static void do_client_work(const int fd) {
 	char buf[64];
 	int len;
-	len = snprintf (buf, sizeof(buf), "[pid:%d] test mesg", getpid());
+	struct sockaddr_in client_addr;
+	socklen_t client_addr_len;
+
+	client_addr_len = sizeof(client_addr);
+	MEMSET(client_addr);
+	SYSCALLWRAP(getsockname, fd, (struct sockaddr*)&client_addr, &client_addr_len);
+	
+	len = snprintf (buf, sizeof(buf), "(pid=%d addr=%s, port=%d)", getpid(),
+					inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 	if (len < 0) {
 		err(1, "snprintf");
 	}

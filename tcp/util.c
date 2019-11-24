@@ -1,5 +1,6 @@
 #include  <unistd.h>
 #include  <sys/errno.h>
+#include  <sys/syscall.h>
 
 #include  "util.h"
 
@@ -30,3 +31,6 @@ ssize_t do_write (const int fd, void *buf, const size_t count) {
 	GENERIC_DO_READWRITE(write);
 }
 
+pid_t gettid(void) {
+	return syscall(SYS_gettid);
+}
