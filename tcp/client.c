@@ -37,21 +37,33 @@ static void do_client_work(const int fd) {
 	}
 	do_write(fd, buf, len);
 }
-static void client_main(const char *server_ip, const int server_port) {
-	int client_sock;
+static void client_port_bind(int fd, int port) {
 	struct sockaddr_in client_addr;
+	if (port <= 0 || port >= 65536) {
+		return;
+	}
+	MEMSET(client_addr);
+	client_addr.sin_family = AF_INET;
+	client_addr.sin_port = htons(port);
+	client_addr.sin_addr.s_addr = INADDR_ANY;
+	SYSCALLWRAP(bind, fd, (struct sockaddr*)&client_addr, sizeof(client_addr));
+}
+static void client_main(const char *server_ip, const int server_port, const int client_port) {
+	int client_sock;
+	struct sockaddr_in server_addr;
 
 	client_sock = create_socket(AF_INET, SOCK_STREAM);
 	if (client_sock < 0) {
 		errx(1, "socket");
 		return;
 	}
-
-	MEMSET (client_addr);
-	client_addr.sin_family = PF_INET;
-	client_addr.sin_addr.s_addr = inet_addr(server_ip);
-	client_addr.sin_port = htons(server_port);
-	SYSCALLWRAP(connect, client_sock, (struct sockaddr*)&client_addr, sizeof(client_addr));
+	client_port_bind (client_sock, client_port);
+	
+	MEMSET (server_addr);
+	server_addr.sin_family = PF_INET;
+	server_addr.sin_addr.s_addr = inet_addr(server_ip);
+	server_addr.sin_port = htons(server_port);
+	SYSCALLWRAP(connect, client_sock, (struct sockaddr*)&server_addr, sizeof(server_addr));
 	printf("connecting %s:%d\n", server_ip, server_port);
 
 	do_client_work(client_sock);
@@ -60,7 +72,8 @@ static void client_main(const char *server_ip, const int server_port) {
 
 int main(int argc, char *argv[]){
 	char *ip_addr = "127.0.0.1";
-	int my_port = 12345;
+	int server_port = 12345;
+	int client_port = -1;
 	if (argc >= 2) {
 		int tmp;
 		char *p;
@@ -74,9 +87,15 @@ int main(int argc, char *argv[]){
 		}
 		tmp = atoi(p);
 		if (tmp > 0 && tmp < 65536) {
-			my_port = tmp;
+			server_port = tmp;
 		}
 	}
-	client_main(ip_addr, my_port);
+	if (argc >= 3) {
+		int tmp = atoi(argv[2]);
+		if (tmp > 0 && tmp < 65536) {
+			client_port = tmp;
+		}
+	}
+	client_main(ip_addr, server_port, client_port);
 	return 0;
 }
