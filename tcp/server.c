@@ -86,7 +86,7 @@ static void client_thread_init(){
 }
 
 
-static void server_main(const int server_port){
+static void server_main(const char *server_ip, const int server_port){
 	int client_sock = -1;
 	int server_sock = -1;
 	int on_value = 1;
@@ -105,11 +105,16 @@ static void server_main(const int server_port){
 	MEMSET(server_addr);
 	server_addr.sin_family = AF_INET;
 	server_addr.sin_port = htons(server_port);
-	server_addr.sin_addr.s_addr = INADDR_ANY;
+	if (server_ip == NULL) {
+		server_addr.sin_addr.s_addr = INADDR_ANY;
+	} else {
+		server_addr.sin_addr.s_addr = inet_addr(server_ip);
+	}
 	//server_addr.sa_addr.s_addr = inet_addr("127.0.0.1");
 
 	SYSCALLWRAP(bind, server_sock, (struct sockaddr*)&server_addr, sizeof(server_addr));
 	SYSCALLWRAP(listen, server_sock, SOMAXCONN);
+	printf("bind %s:%d\n", server_ip, server_port);
 
 	while (1) {
 		MEMSET(client_addr);
@@ -135,9 +140,26 @@ static void server_main(const int server_port){
 }
 
 int main(int argc, char *argv[]){
-	
+	char *ip_addr = NULL;
+	int my_port = 12345;
+	if (argc >= 2) {
+		int tmp;
+		char *p;
+		p = strchr(argv[1], ':');
+		if (p != NULL) {
+			*p = '\0';
+			ip_addr = argv[1];
+			p++;
+		} else {
+			p = argv[1];
+		}
+		tmp = atoi(p);
+		if (tmp > 0 && tmp < 65536) {
+			my_port = tmp;
+		}
+	}
 	client_thread_init();
-	server_main(12345);
+	server_main(ip_addr, my_port);
 	printf("waiting client_fd to be closed\n");
 	sleep(1);
 	return 0;

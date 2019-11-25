@@ -37,7 +37,7 @@ static void do_client_work(const int fd) {
 	}
 	do_write(fd, buf, len);
 }
-static void client_main(const int server_port) {
+static void client_main(const char *server_ip, const int server_port) {
 	int client_sock;
 	struct sockaddr_in client_addr;
 
@@ -49,15 +49,34 @@ static void client_main(const int server_port) {
 
 	MEMSET (client_addr);
 	client_addr.sin_family = PF_INET;
-	client_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+	client_addr.sin_addr.s_addr = inet_addr(server_ip);
 	client_addr.sin_port = htons(server_port);
 	SYSCALLWRAP(connect, client_sock, (struct sockaddr*)&client_addr, sizeof(client_addr));
+	printf("connecting %s:%d\n", server_ip, server_port);
 
 	do_client_work(client_sock);
 	close(client_sock);
 }
 
 int main(int argc, char *argv[]){
-	client_main(12345);
+	char *ip_addr = "127.0.0.1";
+	int my_port = 12345;
+	if (argc >= 2) {
+		int tmp;
+		char *p;
+		p = strchr(argv[1], ':');
+		if (p != NULL) {
+			*p = '\0';
+			ip_addr = argv[1];
+			p++;
+		} else {
+			p = argv[1];
+		}
+		tmp = atoi(p);
+		if (tmp > 0 && tmp < 65536) {
+			my_port = tmp;
+		}
+	}
+	client_main(ip_addr, my_port);
 	return 0;
 }
