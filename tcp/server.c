@@ -111,6 +111,7 @@ static void server_main(const char *server_ip, const int server_port){
 		server_addr.sin_addr.s_addr = inet_addr(server_ip);
 	}
 	//server_addr.sa_addr.s_addr = inet_addr("127.0.0.1");
+	//server_addr.sa_addr.s_addr = INADDR_LOOPBACK;
 
 	SYSCALLWRAP(bind, server_sock, (struct sockaddr*)&server_addr, sizeof(server_addr));
 	SYSCALLWRAP(listen, server_sock, SOMAXCONN);
