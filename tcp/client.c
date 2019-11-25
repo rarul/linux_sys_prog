@@ -35,7 +35,7 @@ static void do_client_work(const int fd) {
 	if (len < 0) {
 		err(1, "snprintf");
 	}
-	do_write(fd, buf, len);
+	do_write(fd, buf, sizeof(buf));
 }
 static void client_port_bind(int fd, int port) {
 	struct sockaddr_in client_addr;
