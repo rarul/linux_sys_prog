@@ -24,7 +24,6 @@
 #define MEMSET(val) memset(&val,0,sizeof(val))
 
 static void do_sched_setattr(const int sched_policy, const int sched_prio) {
-	int ret;
 	struct sched_attr sattr;
 	MEMSET(sattr);
 	sattr.size = sizeof(sattr);

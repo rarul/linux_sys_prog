@@ -1,6 +1,6 @@
 CC := gcc
 CXX := g++
-CFLAGS := $(CFLAGS) -c -g -O2 -Wextra
+CFLAGS := $(CFLAGS) -c -g -O2 -Wextra -Wall
 CXXFLAGS := $(CXXFLAGS) $(CFLAGS)
 #LDFLAGS ?=
 

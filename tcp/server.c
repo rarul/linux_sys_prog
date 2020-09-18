@@ -51,7 +51,7 @@ static void do_client_work(const int fd) {
 	}
 }
 
-static void *server_client_thread(void *arg) {
+static void *server_client_thread(void *arg __attribute__((unused))) {
 	int client_fd = -1;
 	ssize_t read_size;
 	while (1) {
@@ -89,7 +89,6 @@ static void client_thread_init(){
 static void server_main(const char *server_ip, const int server_port){
 	int client_sock = -1;
 	int server_sock = -1;
-	int on_value = 1;
 	ssize_t write_size = -1;
 
 	struct sockaddr_in server_addr;
